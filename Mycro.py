@@ -1,17 +1,15 @@
-# pip install pyaudio
-
 import pyttsx3 #pip install pyttsx3
-import speech_recognition as sr #pip install speechRecognition
+import speech_recognition as sr
 import datetime
 import wikipedia #pip install wikipedia
 import webbrowser
 import os
 import pyjokes
 import requests
+import openai
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
-# print(voices[1].id)
 engine.setProperty('voice', voices[0].id)
 
 
@@ -34,7 +32,6 @@ def wishMe():
     speak("I am Mycro Sir. Please tell me how may I help you")       
 
 def takeCommand():
-    #It takes microphone input from the user and returns string output
 
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -47,16 +44,15 @@ def takeCommand():
         query = r.recognize_google(audio, language='en-in')
         print(f"User said: {query}\n")
 
-    except Exception as e:
-        # print(e)    
+    except Exception as e:   
         print("Say that again please...")  
         return "None"
     return query
 
 def get_weather():
-    api_key = "aaa4eaa87280a0cb5d5b9cf36c92e5be"
-    base_url = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={aaa4eaa87280a0cb5d5b9cf36c92e5be}"
-    city_name = "Siliguri"
+    api_key = "your_openweathermap_api_key"
+    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+    city_name = "your_city"
     complete_url = base_url + "q=" + city_name + "&appid=" + api_key
 
     response = requests.get(complete_url)
@@ -72,13 +68,23 @@ def get_weather():
 
     return response_text
 
+def generate_response(prompt):
+    try:
+        response = openai.Completion.create(
+            model="gpt-4",
+            prompt=prompt,
+            max_tokens=150
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        print(f"Error generating response: {e}")
+        return "I'm sorry, I couldn't process that."
+
 if __name__ == "__main__":
     wishMe()
     while True:
-    # if 1:
         query = takeCommand().lower()
 
-        # Logic for executing tasks based on query
         if 'wikipedia' in query:
             speak('Searching Wikipedia...')
             query = query.replace("wikipedia", "")
@@ -93,18 +99,22 @@ if __name__ == "__main__":
 
         elif 'open google' in query:
             webbrowser.open("google.com")
+            speak("Opening Google")
 
         elif 'open stackoverflow' in query:
-            webbrowser.open("stackoverflow.com")  
+            webbrowser.open("stackoverflow.com")
+            speak("Opening Stack Overflow")
 
         elif 'open wikipedia' in query:
             webbrowser.open("wikipedia.com")
+            speak("Opening Wikipedia")
 
         elif 'play music' in query:
-            music_dir = 'D:\\Non Critical\\songs\\Favorite Songs2'
+            music_dir = 'you music directory'
             songs = os.listdir(music_dir)
             print(songs)    
             os.startfile(os.path.join(music_dir, songs[0]))
+            speak("PLaying Music")
 
         elif 'the time' in query:
             strTime = datetime.datetime.now().strftime("%H:%M:%S")    
@@ -125,4 +135,6 @@ if __name__ == "__main__":
             print(joke)
                 
         else:
-            print("No query matched")
+            response = generate_response(query)
+            speak(response)
+            print(response)
