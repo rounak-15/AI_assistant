@@ -1,4 +1,4 @@
-**Mycro AI Assistant**
+#Mycro AI Assistant
 
 **Overview**
 
